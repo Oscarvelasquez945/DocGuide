@@ -6,6 +6,8 @@ node_modules/
 # Expo
 .expo/
 dist/
+dist-web/
+dist-android/
 web-build/
 expo-env.d.ts
 
@@ -17,6 +19,7 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+*.apk
 
 # Metro
 .metro-health-check*
@@ -32,6 +35,8 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
+test-accounts.local.txt
 
 # typescript
 *.tsbuildinfo
