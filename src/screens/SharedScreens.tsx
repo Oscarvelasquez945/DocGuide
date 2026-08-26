@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import {
+  Image,
   Linking,
   Pressable,
   ScrollView,
@@ -67,6 +68,7 @@ export function ChatScreen({
   const [typing, setTyping] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const messageListRef = useRef<ScrollView>(null);
 
   const activeConversation =
     conversations.find((conversation) => conversation.id === activeId) ?? null;
@@ -231,25 +233,33 @@ export function ChatScreen({
     setDraft('');
     setTyping(true);
     setError('');
+    const temporaryMessageId = -Date.now();
+    updateMessages(activeId, (current) => [
+      ...current,
+      { id: temporaryMessageId, from: 'user', text: value },
+    ]);
+    if (activeConversation?.title === 'Nueva conversación') {
+      const title = value.length > 28 ? `${value.slice(0, 28)}…` : value;
+      setConversations((current) =>
+        current.map((conversation) =>
+          conversation.id === activeId ? { ...conversation, title } : conversation,
+        ),
+      );
+    }
     try {
       const result = await askVitali(activeId, value, searchContext);
       const storedUserMessage = result.userMessage;
-      updateMessages(activeId, (current) => [
-        ...current,
-        { id: storedUserMessage.id, from: 'user', text: storedUserMessage.content },
-      ]);
-      if (activeConversation?.title === 'Nueva conversación') {
-        const title = value.length > 28 ? `${value.slice(0, 28)}…` : value;
-        setConversations((current) =>
-          current.map((conversation) =>
-            conversation.id === activeId ? { ...conversation, title } : conversation,
-          ),
-        );
-      }
-
       const storedReply = result.assistantMessage;
       updateMessages(activeId, (current) => [
-        ...current,
+        ...current.map((message) =>
+          message.id === temporaryMessageId
+            ? {
+                id: storedUserMessage.id,
+                from: 'user' as const,
+                text: storedUserMessage.content,
+              }
+            : message,
+        ),
         { id: storedReply.id, from: 'bot', text: storedReply.content },
       ]);
     } catch (reason) {
@@ -331,10 +341,15 @@ export function ChatScreen({
         <>
       <View style={styles.chatIdentity}>
         <View style={styles.botAvatar}>
-          <MaterialCommunityIcons color={colors.white} name="robot-happy-outline" size={28} />
+          <Image
+            accessibilityLabel="Vitali"
+            resizeMode="contain"
+            source={require('../../assets/bot.png')}
+            style={styles.botAvatarImage}
+          />
         </View>
         <View>
-          <Text style={styles.botName}>Asistente DocGuide</Text>
+          <Text style={styles.botName}>Vitali · Asistente DocGuide</Text>
           <View style={styles.onlineRow}>
             <View style={styles.onlineDot} />
             <Text style={styles.onlineText}>Disponible ahora</Text>
@@ -345,6 +360,8 @@ export function ChatScreen({
       <ScrollView
         contentContainerStyle={styles.messages}
         keyboardShouldPersistTaps="handled"
+        onContentSizeChange={() => messageListRef.current?.scrollToEnd({ animated: true })}
+        ref={messageListRef}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.safety}>
@@ -359,23 +376,46 @@ export function ChatScreen({
           <View
             key={message.id}
             style={[
-              styles.bubble,
-              message.from === 'user' ? styles.userBubble : styles.botBubble,
+              styles.messageRow,
+              message.from === 'user' ? styles.userMessageRow : styles.botMessageRow,
             ]}
           >
-            <Text
+            {message.from === 'bot' && (
+              <Image
+                accessibilityLabel="Vitali"
+                resizeMode="contain"
+                source={require('../../assets/bot.png')}
+                style={styles.messageBotImage}
+              />
+            )}
+            <View
               style={[
-                styles.messageText,
-                message.from === 'user' && styles.userMessageText,
+                styles.bubble,
+                message.from === 'user' ? styles.userBubble : styles.botBubble,
               ]}
             >
-              {message.text}
-            </Text>
+              <Text
+                style={[
+                  styles.messageText,
+                  message.from === 'user' && styles.userMessageText,
+                ]}
+              >
+                {message.text}
+              </Text>
+            </View>
           </View>
         ))}
         {typing && (
-          <View style={[styles.bubble, styles.botBubble]}>
-            <Text style={styles.typing}>Vitali está escribiendo…</Text>
+          <View style={[styles.messageRow, styles.botMessageRow]}>
+            <Image
+              accessibilityLabel="Vitali"
+              resizeMode="contain"
+              source={require('../../assets/bot.png')}
+              style={styles.messageBotImage}
+            />
+            <View style={[styles.bubble, styles.botBubble]}>
+              <Text style={styles.typing}>Vitali está escribiendo…</Text>
+            </View>
           </View>
         )}
       </ScrollView>
@@ -570,13 +610,14 @@ const styles = StyleSheet.create({
   },
   botAvatar: {
     alignItems: 'center',
-    backgroundColor: colors.blue,
+    backgroundColor: '#E5EFFF',
     borderRadius: 18,
     height: 52,
     justifyContent: 'center',
     marginRight: 11,
     width: 52,
   },
+  botAvatarImage: { height: 46, width: 38 },
   botName: { color: colors.navy, fontSize: 15, fontWeight: '800' },
   onlineRow: { alignItems: 'center', flexDirection: 'row', marginTop: 3 },
   onlineDot: { backgroundColor: colors.success, borderRadius: 4, height: 8, marginRight: 5, width: 8 },
@@ -593,9 +634,18 @@ const styles = StyleSheet.create({
     padding: 11,
   },
   safetyText: { color: '#765215', flex: 1, fontSize: 11, lineHeight: 16, marginLeft: 7 },
-  bubble: { borderRadius: 18, marginBottom: 10, maxWidth: '84%', paddingHorizontal: 15, paddingVertical: 12 },
-  botBubble: { alignSelf: 'flex-start', backgroundColor: colors.white, borderBottomLeftRadius: 5 },
-  userBubble: { alignSelf: 'flex-end', backgroundColor: colors.blue, borderBottomRightRadius: 5 },
+  messageRow: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    marginBottom: 10,
+    width: '100%',
+  },
+  botMessageRow: { justifyContent: 'flex-start' },
+  userMessageRow: { justifyContent: 'flex-end' },
+  messageBotImage: { height: 46, marginRight: 8, width: 35 },
+  bubble: { borderRadius: 18, maxWidth: '78%', paddingHorizontal: 15, paddingVertical: 12 },
+  botBubble: { backgroundColor: colors.white, borderBottomLeftRadius: 5 },
+  userBubble: { backgroundColor: colors.blue, borderBottomRightRadius: 5 },
   messageText: { color: colors.navy, fontSize: 14, lineHeight: 20 },
   userMessageText: { color: colors.white },
   typing: { color: colors.muted, fontSize: 12, fontStyle: 'italic' },

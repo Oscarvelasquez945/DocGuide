@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
   },
   brandContainer: {
-    marginBottom: 70,
+    marginBottom: 32,
   },
   loadingContainer: {
     alignItems: 'center',

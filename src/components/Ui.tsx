@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import type { ReactNode } from 'react';
 import {
+  Image,
   KeyboardTypeOptions,
   Pressable,
   SafeAreaView,
@@ -194,18 +195,33 @@ export function BottomNav({
     <View style={styles.bottomNav}>
       {items.map((item) => {
         const active = current === item.route;
+        const isVitali = item.route === 'chat';
         return (
           <Pressable
             key={item.route}
             onPress={() => navigate(item.route)}
             style={styles.navItem}
           >
-            <View style={[styles.navIcon, active && styles.navIconActive]}>
-              <MaterialCommunityIcons
-                color={active ? colors.white : '#6D819A'}
-                name={item.icon}
-                size={23}
-              />
+            <View
+              style={[
+                styles.navIcon,
+                active && (isVitali ? styles.vitaliIconActive : styles.navIconActive),
+              ]}
+            >
+              {isVitali ? (
+                <Image
+                  accessibilityLabel="Vitali"
+                  resizeMode="contain"
+                  source={require('../../assets/bot.png')}
+                  style={[styles.vitaliNavImage, !active && styles.vitaliNavImageInactive]}
+                />
+              ) : (
+                <MaterialCommunityIcons
+                  color={active ? colors.white : '#6D819A'}
+                  name={item.icon}
+                  size={23}
+                />
+              )}
             </View>
             <Text style={[styles.navLabel, active && styles.navLabelActive]}>
               {item.label}
@@ -379,6 +395,9 @@ const styles = StyleSheet.create({
     width: 44,
   },
   navIconActive: { backgroundColor: colors.blue },
+  vitaliIconActive: { backgroundColor: '#DDEAFF' },
+  vitaliNavImage: { height: 31, width: 24 },
+  vitaliNavImageInactive: { opacity: 0.58 },
   navLabel: { color: '#6D819A', fontSize: 10, fontWeight: '700', marginTop: 3 },
   navLabelActive: { color: colors.blue },
   infoPill: {

@@ -1,5 +1,6 @@
+import { useEffect, useRef } from 'react';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import MapView, { Circle, Marker } from 'react-native-maps';
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
 
 import { colors } from './Ui';
@@ -14,6 +15,19 @@ export function MapCanvas({
   onCoordinateChange,
   onDoctorPress,
 }: MapCanvasProps) {
+  const mapRef = useRef<MapView>(null);
+
+  useEffect(() => {
+    mapRef.current?.animateToRegion(
+      {
+        ...center,
+        latitudeDelta: 0.08,
+        longitudeDelta: 0.08,
+      },
+      500,
+    );
+  }, [center.latitude, center.longitude]);
+
   return (
     <View style={styles.container}>
       <MapView
@@ -22,19 +36,31 @@ export function MapCanvas({
           latitudeDelta: 0.08,
           longitudeDelta: 0.08,
         }}
+        mapType="standard"
+        onPress={(event) => {
+          if (selectable) onCoordinateChange?.(event.nativeEvent.coordinate);
+        }}
         onLongPress={(event) => {
           if (selectable) onCoordinateChange?.(event.nativeEvent.coordinate);
         }}
+        provider={PROVIDER_GOOGLE}
+        ref={mapRef}
+        showsCompass
+        showsMyLocationButton
         showsUserLocation
         style={StyleSheet.absoluteFill}
+        toolbarEnabled
+        zoomControlEnabled
       >
-        <Circle
-          center={center}
-          fillColor="rgba(47,117,217,0.14)"
-          radius={radiusMeters}
-          strokeColor="rgba(47,117,217,0.65)"
-          strokeWidth={2}
-        />
+        {!selectable && (
+          <Circle
+            center={center}
+            fillColor="rgba(47,117,217,0.14)"
+            radius={radiusMeters}
+            strokeColor="rgba(47,117,217,0.65)"
+            strokeWidth={2}
+          />
+        )}
         {selectable && selectedCoordinate && (
           <Marker
             coordinate={selectedCoordinate}
@@ -59,6 +85,7 @@ export function MapCanvas({
             }}
             key={doctor.id}
             onPress={() => onDoctorPress?.(doctor)}
+            description={`${doctor.specialty} · ${doctor.distanceKm.toFixed(1)} km`}
             title={doctor.name}
           >
             <View style={styles.doctorPin}>
