@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { doctors, type Doctor } from './src/data/mockData';
 import type { AppRoute, UserMode } from './src/types/navigation';
@@ -102,9 +103,9 @@ export default function App() {
   })();
 
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar animated style={route === 'splash' ? 'light' : 'dark'} />
       {screen}
-    </>
+    </SafeAreaProvider>
   );
 }

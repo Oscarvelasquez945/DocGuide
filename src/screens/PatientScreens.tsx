@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as Location from 'expo-location';
 import {
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -150,7 +151,7 @@ export function PatientMapScreen({
 
   if (permission === 'pending') {
     return (
-      <Screen>
+      <Screen scroll>
         <Header onBack={() => navigate('role-selection')} title="Tu ubicación" />
         <View style={styles.permissionContent}>
           <View style={styles.permissionIcon}>
@@ -209,15 +210,34 @@ export function PatientMapScreen({
         <MaterialCommunityIcons color={colors.blue} name="tune-variant" size={21} />
       </View>
 
+      {permission === 'manual' && (
+        <View style={styles.manualHint}>
+          <MaterialCommunityIcons color={colors.blue} name="gesture-tap" size={22} />
+          <Text style={styles.manualHintText}>
+            Toca cualquier punto del mapa para cambiar el centro de búsqueda.
+          </Text>
+        </View>
+      )}
+
       <MapCanvas
         center={center}
         doctors={visibleDoctors}
+        onCoordinateChange={setCenter}
         onDoctorPress={(doctor) => {
           selectDoctor(doctor);
           navigate('doctor-public-profile');
         }}
         radiusMeters={radius * 1000}
+        selectable={permission === 'manual'}
+        selectedCoordinate={permission === 'manual' ? center : undefined}
+        showRadius
       />
+
+      {permission === 'manual' && (
+        <Text style={styles.selectedLocationText}>
+          Punto seleccionado: {center.latitude.toFixed(5)}, {center.longitude.toFixed(5)}
+        </Text>
+      )}
 
       <Text style={styles.radiusLabel}>Radio de búsqueda: {radius} km</Text>
       <View style={styles.radiusRow}>
@@ -266,7 +286,12 @@ export function PatientMapScreen({
           <Text style={styles.chatCtaText}>Vitali puede orientarte.</Text>
         </View>
         <Pressable onPress={() => navigate('chat')} style={styles.chatCtaButton}>
-          <MaterialCommunityIcons color={colors.white} name="robot-happy-outline" size={24} />
+          <Image
+            accessibilityLabel="Abrir Vitali"
+            resizeMode="contain"
+            source={require('../../assets/bot.png')}
+            style={styles.chatCtaVitali}
+          />
         </Pressable>
       </View>
       <View style={styles.bottomSpace} />
@@ -458,6 +483,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   searchText: { color: '#8192A8', flex: 1, fontSize: 14, marginLeft: 9 },
+  manualHint: {
+    alignItems: 'center',
+    backgroundColor: '#E1ECFF',
+    borderRadius: 15,
+    flexDirection: 'row',
+    marginBottom: 12,
+    padding: 12,
+  },
+  manualHintText: { color: colors.navy, flex: 1, fontSize: 12, lineHeight: 17, marginLeft: 9 },
+  selectedLocationText: {
+    color: colors.muted,
+    fontSize: 11,
+    marginTop: 8,
+    textAlign: 'center',
+  },
   map: {
     backgroundColor: '#DCE9DD',
     borderRadius: 26,
@@ -565,12 +605,13 @@ const styles = StyleSheet.create({
   chatCtaText: { color: colors.muted, fontSize: 12, marginTop: 3 },
   chatCtaButton: {
     alignItems: 'center',
-    backgroundColor: colors.blue,
+    backgroundColor: colors.white,
     borderRadius: 17,
     height: 48,
     justifyContent: 'center',
     width: 48,
   },
+  chatCtaVitali: { height: 39, width: 31 },
   bottomSpace: { height: 88 },
   publicHero: { alignItems: 'center', marginBottom: 26, marginTop: 28 },
   publicName: { color: colors.navy, fontSize: 24, fontWeight: '900', marginTop: 14 },

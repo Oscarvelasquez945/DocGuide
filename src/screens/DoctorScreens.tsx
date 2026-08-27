@@ -338,7 +338,7 @@ export function OfficeLocationScreen({
         specialty: registration.specialty,
         latitude: selectedCoordinate.latitude,
         longitude: selectedCoordinate.longitude,
-        officeAddress: 'Col. Palmira, Tegucigalpa',
+        officeAddress: `Ubicación seleccionada (${selectedCoordinate.latitude.toFixed(5)}, ${selectedCoordinate.longitude.toFixed(5)})`,
       });
       navigate('doctor-home');
     } catch (reason) {
@@ -366,7 +366,9 @@ export function OfficeLocationScreen({
         <MaterialCommunityIcons color={colors.blue} name="map-marker" size={26} />
         <View style={styles.locationCopy}>
           <Text style={styles.locationTitle}>Consultorio DocGuide</Text>
-          <Text style={styles.locationAddress}>Col. Palmira, Tegucigalpa</Text>
+          <Text style={styles.locationAddress}>
+            {selectedCoordinate.latitude.toFixed(5)}, {selectedCoordinate.longitude.toFixed(5)}
+          </Text>
         </View>
         <MaterialCommunityIcons color={colors.success} name="check-circle" size={24} />
       </View>
@@ -384,7 +386,7 @@ export function OfficeLocationScreen({
 
 export function DoctorHomeScreen({ navigate }: { navigate: Navigate }) {
   return (
-    <Screen>
+    <Screen scroll>
       <Header
         right={
           <Pressable onPress={() => navigate('contact')} style={styles.headerIcon}>
@@ -437,6 +439,7 @@ export function DoctorHomeScreen({ navigate }: { navigate: Navigate }) {
           <InfoPill icon="stethoscope" text="Cardiología" />
         </View>
       </View>
+      <View style={styles.bottomSpace} />
       <BottomNav current="doctor-home" mode="doctor" navigate={navigate} />
     </Screen>
   );

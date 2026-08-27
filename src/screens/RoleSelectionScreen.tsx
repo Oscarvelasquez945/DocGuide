@@ -3,12 +3,13 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import {
   Animated,
   Pressable,
-  SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BackgroundBubbles } from '../components/BackgroundBubbles';
 import { BrandLogo } from '../components/BrandLogo';
@@ -95,7 +96,11 @@ export function RoleSelectionScreen({
 }) {
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.screen}>
+      <ScrollView
+        bounces={false}
+        contentContainerStyle={styles.screen}
+        showsVerticalScrollIndicator={false}
+      >
         <BackgroundBubbles light />
 
         <View style={styles.header}>
@@ -131,7 +136,7 @@ export function RoleSelectionScreen({
         <Text style={styles.footerText}>
           Podrás cambiar de cuenta más adelante.
         </Text>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -142,8 +147,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   screen: {
-    flex: 1,
-    overflow: 'hidden',
+    flexGrow: 1,
+    paddingBottom: 28,
     paddingHorizontal: 24,
     paddingTop: 22,
   },
@@ -250,12 +255,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#2864C7',
   },
   footerText: {
-    bottom: 23,
     color: '#6A7D95',
     fontSize: 12,
-    left: 0,
-    position: 'absolute',
-    right: 0,
+    marginTop: 26,
+    paddingBottom: 8,
     textAlign: 'center',
   },
 });

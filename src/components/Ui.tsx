@@ -4,7 +4,6 @@ import {
   Image,
   KeyboardTypeOptions,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { AppRoute, Navigate, UserMode } from '../types/navigation';
 import { BrandLogo } from './BrandLogo';
@@ -39,7 +39,7 @@ export function Screen({
   const content = <View style={styles.screenContent}>{children}</View>;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.safe}>
       {scroll ? (
         <ScrollView
           contentContainerStyle={styles.scroll}
@@ -73,7 +73,13 @@ export function Header({
       ) : (
         <BrandLogo compact />
       )}
-      {title ? <Text style={styles.headerTitle}>{title}</Text> : <View />}
+      {title ? (
+        <Text numberOfLines={1} style={styles.headerTitle}>
+          {title}
+        </Text>
+      ) : (
+        <View />
+      )}
       {right ?? <View style={styles.headerSpacer} />}
     </View>
   );
@@ -297,7 +303,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 44,
   },
-  headerTitle: { color: colors.navy, fontSize: 17, fontWeight: '800' },
+  headerTitle: {
+    color: colors.navy,
+    flex: 1,
+    fontSize: 17,
+    fontWeight: '800',
+    marginHorizontal: 10,
+    minWidth: 0,
+    textAlign: 'center',
+  },
   headerSpacer: { width: 44 },
   field: { marginBottom: 15 },
   label: {

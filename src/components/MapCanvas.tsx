@@ -14,6 +14,7 @@ export type MapCanvasProps = {
   radiusMeters?: number;
   doctors?: Doctor[];
   selectable?: boolean;
+  showRadius?: boolean;
   selectedCoordinate?: MapCoordinate;
   onCoordinateChange?: (coordinate: MapCoordinate) => void;
   onDoctorPress?: (doctor: Doctor) => void;
@@ -24,6 +25,7 @@ export function MapCanvas({
   radiusMeters = 5000,
   doctors = [],
   selectable,
+  showRadius = !selectable,
   selectedCoordinate,
   onCoordinateChange,
   onDoctorPress,
@@ -40,17 +42,19 @@ export function MapCanvas({
       <View style={[styles.road, styles.roadOne]} />
       <View style={[styles.road, styles.roadTwo]} />
       <View style={[styles.road, styles.roadThree]} />
-      <View
-        style={[
-          styles.radius,
-          {
-            height: Math.min(210, 100 + radiusMeters / 100),
-            width: Math.min(210, 100 + radiusMeters / 100),
-          },
-        ]}
-      >
-        <View style={styles.userPoint} />
-      </View>
+      {showRadius && (
+        <View
+          style={[
+            styles.radius,
+            {
+              height: Math.min(210, 100 + radiusMeters / 100),
+              width: Math.min(210, 100 + radiusMeters / 100),
+            },
+          ]}
+        >
+          <View style={styles.userPoint} />
+        </View>
+      )}
 
       {selectable &&
         [0, 1, 2, 3, 4].map((index) => (

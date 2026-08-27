@@ -11,6 +11,7 @@ export function MapCanvas({
   radiusMeters = 5000,
   doctors = [],
   selectable,
+  showRadius = !selectable,
   selectedCoordinate,
   onCoordinateChange,
   onDoctorPress,
@@ -52,7 +53,7 @@ export function MapCanvas({
         toolbarEnabled
         zoomControlEnabled
       >
-        {!selectable && (
+        {showRadius && (
           <Circle
             center={center}
             fillColor="rgba(47,117,217,0.14)"
