@@ -21,6 +21,7 @@ export type DoctorProfileRow = {
   biography: string | null;
   experience_years: number | null;
   office_address: string | null;
+  services_offered: string | null;
   is_active: boolean;
   is_verified: boolean;
   phone_is_public: boolean;
@@ -39,6 +40,7 @@ export type NearbyDoctor = {
   biography: string | null;
   experience_years: number | null;
   office_address: string | null;
+  services_offered: string | null;
   latitude: number;
   longitude: number;
   distance_meters: number;

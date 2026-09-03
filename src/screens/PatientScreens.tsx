@@ -127,6 +127,7 @@ export function PatientMapScreen({
             distanceKm: Math.round((doctor.distance_meters / 1000) * 10) / 10,
             phone: doctor.public_phone ?? 'Teléfono privado',
             address: doctor.office_address ?? 'Consultorio registrado',
+            servicesOffered: doctor.services_offered ?? undefined,
             experience: doctor.experience_years ?? 0,
             rating: 0,
             color: ['#3375D6', '#6E62D9', '#239E9A', '#E5844D'][index % 4],
@@ -362,6 +363,12 @@ export function DoctorPublicProfileScreen({
         <Text style={styles.infoText}>
           Profesional comprometido con una atención cercana, clara y basada en
           evidencia. Su perfil ha sido verificado para esta demostración.
+        </Text>
+      </View>
+      <View style={styles.infoCard}>
+        <Text style={styles.infoTitle}>Prácticas y servicios</Text>
+        <Text style={styles.infoText}>
+          {doctor.servicesOffered || 'El médico todavía no ha detallado sus servicios.'}
         </Text>
       </View>
       <View style={styles.infoCard}>

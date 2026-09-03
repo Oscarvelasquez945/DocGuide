@@ -270,7 +270,7 @@ export function ChatScreen({
   };
 
   return (
-    <Screen>
+    <Screen keyboardAvoiding>
       <Header
         onBack={() => navigate(mode === 'doctor' ? 'doctor-home' : 'patient-map')}
         right={

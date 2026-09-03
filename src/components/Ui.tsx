@@ -2,7 +2,9 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import type { ReactNode } from 'react';
 import {
   Image,
+  KeyboardAvoidingView,
   KeyboardTypeOptions,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -32,24 +34,37 @@ export const colors = {
 export function Screen({
   children,
   scroll = false,
+  keyboardAvoiding = false,
 }: {
   children: ReactNode;
   scroll?: boolean;
+  keyboardAvoiding?: boolean;
 }) {
   const content = <View style={styles.screenContent}>{children}</View>;
 
+  const body = scroll ? (
+    <ScrollView
+      contentContainerStyle={styles.scroll}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      {content}
+    </ScrollView>
+  ) : (
+    content
+  );
+
   return (
     <SafeAreaView edges={['top', 'right', 'bottom', 'left']} style={styles.safe}>
-      {scroll ? (
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+      {keyboardAvoiding ? (
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoiding}
         >
-          {content}
-        </ScrollView>
+          {body}
+        </KeyboardAvoidingView>
       ) : (
-        content
+        body
       )}
     </SafeAreaView>
   );
@@ -278,6 +293,7 @@ export function Avatar({
 
 const styles = StyleSheet.create({
   safe: { backgroundColor: colors.pale, flex: 1 },
+  keyboardAvoiding: { flex: 1 },
   scroll: { flexGrow: 1 },
   screenContent: {
     alignSelf: 'center',
@@ -419,10 +435,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#E4EEFF',
     borderRadius: 999,
     flexDirection: 'row',
+    maxWidth: '100%',
     paddingHorizontal: 12,
     paddingVertical: 7,
   },
-  infoPillText: { color: colors.navy, fontSize: 12, fontWeight: '700', marginLeft: 5 },
+  infoPillText: {
+    color: colors.navy,
+    flexShrink: 1,
+    fontSize: 12,
+    fontWeight: '700',
+    marginLeft: 5,
+  },
   avatar: { alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: colors.white, fontWeight: '900' },
 });

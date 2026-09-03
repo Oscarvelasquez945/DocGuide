@@ -11,6 +11,7 @@ export type DoctorProfileInput = {
   latitude: number;
   longitude: number;
   officeAddress?: string;
+  servicesOffered?: string;
   biography?: string;
   experienceYears?: number;
   phoneIsPublic?: boolean;
@@ -26,6 +27,7 @@ export async function saveDoctorProfile(input: DoctorProfileInput) {
     p_biography: input.biography ?? null,
     p_experience_years: input.experienceYears ?? null,
     p_phone_is_public: input.phoneIsPublic ?? false,
+    p_services_offered: input.servicesOffered?.trim() || null,
   });
 
   if (error) throw error;
@@ -74,6 +76,8 @@ export async function updateMyDoctorProfile(input: {
   lastName: string;
   phone: string;
   specialty: string;
+  servicesOffered?: string;
+  officeAddress?: string;
   biography?: string;
   experienceYears?: number;
   phoneIsPublic?: boolean;
@@ -95,14 +99,20 @@ export async function updateMyDoctorProfile(input: {
 
   if (profileResult.error) throw profileResult.error;
 
+  const doctorUpdates: Record<string, string | number | boolean | null> = {
+    specialty: input.specialty.trim(),
+    services_offered: input.servicesOffered?.trim() || null,
+    office_address: input.officeAddress?.trim() || null,
+    biography: input.biography?.trim() || null,
+    experience_years: input.experienceYears ?? null,
+  };
+  if (input.phoneIsPublic !== undefined) {
+    doctorUpdates.phone_is_public = input.phoneIsPublic;
+  }
+
   const doctorResult = await supabase
     .from('doctor_profiles')
-    .update({
-      specialty: input.specialty.trim(),
-      biography: input.biography?.trim() || null,
-      experience_years: input.experienceYears ?? null,
-      phone_is_public: input.phoneIsPublic ?? false,
-    })
+    .update(doctorUpdates)
     .eq('user_id', user.id);
 
   if (doctorResult.error) throw doctorResult.error;

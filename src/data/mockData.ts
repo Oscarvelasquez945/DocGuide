@@ -5,6 +5,7 @@ export type Doctor = {
   distanceKm: number;
   phone: string;
   address: string;
+  servicesOffered?: string;
   experience: number;
   rating: number;
   color: string;
@@ -20,6 +21,7 @@ export const doctors: Doctor[] = [
     distanceKm: 1.2,
     phone: '+504 9999-1020',
     address: 'Col. Palmira, Tegucigalpa',
+    servicesOffered: 'Consulta cardiovascular, electrocardiograma y control de hipertensión.',
     experience: 7,
     rating: 4.9,
     color: '#3375D6',
@@ -33,6 +35,7 @@ export const doctors: Doctor[] = [
     distanceKm: 2.8,
     phone: '+504 9970-2241',
     address: 'Blvd. Morazán, Tegucigalpa',
+    servicesOffered: 'Consulta general, chequeo preventivo y seguimiento de enfermedades crónicas.',
     experience: 10,
     rating: 4.8,
     color: '#6E62D9',
@@ -46,6 +49,7 @@ export const doctors: Doctor[] = [
     distanceKm: 4.6,
     phone: '+504 9812-4430',
     address: 'Lomas del Guijarro, Tegucigalpa',
+    servicesOffered: 'Consulta dermatológica, revisión de lunares y tratamiento de acné.',
     experience: 6,
     rating: 4.7,
     color: '#239E9A',
@@ -59,6 +63,7 @@ export const doctors: Doctor[] = [
     distanceKm: 8.4,
     phone: '+504 9450-1182',
     address: 'Col. Kennedy, Tegucigalpa',
+    servicesOffered: 'Evaluación nutricional y planes de alimentación personalizados.',
     experience: 8,
     rating: 4.9,
     color: '#E5844D',

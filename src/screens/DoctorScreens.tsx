@@ -39,6 +39,7 @@ import type { DoctorProfileRow, ProfileRow } from '../types/database';
 export type DoctorRegistrationDraft = DoctorRegistration & {
   identityNumber: string;
   specialty: string;
+  servicesOffered: string;
 };
 
 export function DoctorAccessScreen({ navigate }: { navigate: Navigate }) {
@@ -150,6 +151,7 @@ export function DoctorRegisterScreen({
     confirm: '',
     identity: '',
     specialty: '',
+    servicesOffered: '',
     phone: '',
   });
   const [gender, setGender] = useState<'male' | 'female' | null>(null);
@@ -214,6 +216,15 @@ export function DoctorRegisterScreen({
         onChangeText={(value) => update('specialty', value)}
         placeholder="Ej. Cardiología"
         value={form.specialty}
+      />
+      <AppInput
+        icon="clipboard-text-outline"
+        label="Prácticas y servicios"
+        maxLength={1000}
+        multiline
+        onChangeText={(value) => update('servicesOffered', value)}
+        placeholder="Ej. Consulta, electrocardiograma y control de presión"
+        value={form.servicesOffered}
       />
       <AppInput
         icon="phone-outline"
@@ -292,6 +303,7 @@ export function DoctorRegisterScreen({
               gender,
               identityNumber: form.identity,
               specialty: form.specialty,
+              servicesOffered: form.servicesOffered,
             });
             navigate('office-location');
           }}
@@ -336,6 +348,7 @@ export function OfficeLocationScreen({
       await saveDoctorProfile({
         identityNumber: registration.identityNumber,
         specialty: registration.specialty,
+        servicesOffered: registration.servicesOffered,
         latitude: selectedCoordinate.latitude,
         longitude: selectedCoordinate.longitude,
         officeAddress: `Ubicación seleccionada (${selectedCoordinate.latitude.toFixed(5)}, ${selectedCoordinate.longitude.toFixed(5)})`,
@@ -385,6 +398,29 @@ export function OfficeLocationScreen({
 }
 
 export function DoctorHomeScreen({ navigate }: { navigate: Navigate }) {
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
+  const [doctor, setDoctor] = useState<DoctorProfileRow | null>(null);
+  const [profileError, setProfileError] = useState('');
+
+  useEffect(() => {
+    getMyDoctorProfile()
+      .then((result) => {
+        setProfile(result.profile);
+        setDoctor(result.doctor);
+      })
+      .catch((reason) =>
+        setProfileError(
+          reason instanceof Error ? reason.message : 'No se pudo cargar el perfil.',
+        ),
+      );
+  }, []);
+
+  const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ');
+  const initials = [profile?.first_name, profile?.last_name]
+    .filter(Boolean)
+    .map((part) => part?.[0])
+    .join('') || 'DR';
+
   return (
     <Screen scroll>
       <Header
@@ -396,10 +432,10 @@ export function DoctorHomeScreen({ navigate }: { navigate: Navigate }) {
       />
       <LinearGradient colors={['#2F75D9', '#174B9C']} style={styles.welcomeCard}>
         <View style={styles.welcomeTop}>
-          <Avatar initials="MC" size={58} />
+          <Avatar initials={initials} size={58} />
           <View style={styles.welcomeCopy}>
-            <Text style={styles.welcomeLabel}>BIENVENIDA</Text>
-            <Text style={styles.welcomeName}>Dra. Mónica</Text>
+            <Text style={styles.welcomeLabel}>BIENVENIDO/A</Text>
+            <Text style={styles.welcomeName}>{displayName || 'Profesional DocGuide'}</Text>
           </View>
         </View>
         <Text style={styles.welcomeText}>
@@ -407,6 +443,7 @@ export function DoctorHomeScreen({ navigate }: { navigate: Navigate }) {
           comenzar.
         </Text>
       </LinearGradient>
+      {!!profileError && <Text style={styles.formError}>{profileError}</Text>}
 
       <Text style={styles.homeSectionTitle}>Tu espacio profesional</Text>
       <View style={styles.actionGrid}>
@@ -435,8 +472,11 @@ export function DoctorHomeScreen({ navigate }: { navigate: Navigate }) {
           <View style={styles.activeDot} />
         </View>
         <View style={styles.statusDetails}>
-          <InfoPill icon="map-marker-radius-outline" text="Palmira" />
-          <InfoPill icon="stethoscope" text="Cardiología" />
+          <InfoPill
+            icon="map-marker-radius-outline"
+            text={doctor?.office_address || 'Consultorio registrado'}
+          />
+          <InfoPill icon="stethoscope" text={doctor?.specialty || 'Especialidad'} />
         </View>
       </View>
       <View style={styles.bottomSpace} />
@@ -457,6 +497,8 @@ export function DoctorProfileScreen({ navigate }: { navigate: Navigate }) {
     lastName: '',
     phone: '',
     specialty: '',
+    servicesOffered: '',
+    officeAddress: '',
     biography: '',
     experienceYears: '0',
   });
@@ -471,6 +513,8 @@ export function DoctorProfileScreen({ navigate }: { navigate: Navigate }) {
           lastName: result.profile.last_name ?? '',
           phone: result.profile.phone ?? '',
           specialty: result.doctor.specialty,
+          servicesOffered: result.doctor.services_offered ?? '',
+          officeAddress: result.doctor.office_address ?? '',
           biography: result.doctor.biography ?? '',
           experienceYears: String(result.doctor.experience_years ?? 0),
         });
@@ -504,6 +548,8 @@ export function DoctorProfileScreen({ navigate }: { navigate: Navigate }) {
           ? {
               ...current,
               specialty: form.specialty,
+              services_offered: form.servicesOffered || null,
+              office_address: form.officeAddress || null,
               biography: form.biography,
               experience_years: Number(form.experienceYears) || 0,
             }
@@ -521,6 +567,10 @@ export function DoctorProfileScreen({ navigate }: { navigate: Navigate }) {
   const displayName =
     [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') ||
     'Perfil médico';
+  const profileInitials = [profile?.first_name, profile?.last_name]
+    .filter(Boolean)
+    .map((part) => part?.[0])
+    .join('') || 'DR';
 
   return (
     <Screen scroll>
@@ -538,7 +588,7 @@ export function DoctorProfileScreen({ navigate }: { navigate: Navigate }) {
         title="Mi perfil"
       />
       <View style={styles.profileHero}>
-        <Avatar initials="MC" size={108} />
+        <Avatar initials={profileInitials} size={108} />
         <Text style={styles.profileName}>{displayName}</Text>
         <Text style={styles.profileSpecialty}>
           {loading ? 'Cargando…' : doctor?.specialty ?? 'Sin especialidad'}
@@ -579,9 +629,19 @@ export function DoctorProfileScreen({ navigate }: { navigate: Navigate }) {
             value={form.phone}
           />
           <AppInput
-            defaultValue="Col. Palmira, Tegucigalpa"
             icon="map-marker-outline"
             label="Consultorio"
+            multiline
+            onChangeText={(value) => setForm((current) => ({ ...current, officeAddress: value }))}
+            value={form.officeAddress}
+          />
+          <AppInput
+            icon="clipboard-text-outline"
+            label="Prácticas y servicios"
+            maxLength={1000}
+            multiline
+            onChangeText={(value) => setForm((current) => ({ ...current, servicesOffered: value }))}
+            value={form.servicesOffered}
           />
           <AppInput
             icon="text-box-outline"
@@ -614,6 +674,11 @@ export function DoctorProfileScreen({ navigate }: { navigate: Navigate }) {
               icon="card-account-details-outline"
               label="Identidad"
               value="Información privada"
+            />
+            <ProfileRow
+              icon="clipboard-text-outline"
+              label="Prácticas y servicios"
+              value={doctor?.services_offered ?? 'No registrado'}
             />
           </View>
           <View style={styles.aboutCard}>
@@ -662,7 +727,7 @@ function ProfileRow({
       <View style={styles.profileRowIcon}>
         <MaterialCommunityIcons color={colors.blue} name={icon} size={22} />
       </View>
-      <View>
+      <View style={styles.profileRowCopy}>
         <Text style={styles.profileRowLabel}>{label}</Text>
         <Text style={styles.profileRowValue}>{value}</Text>
       </View>
@@ -804,7 +869,7 @@ const styles = StyleSheet.create({
   statusLabel: { color: colors.muted, fontSize: 9, fontWeight: '900', letterSpacing: 1 },
   statusTitle: { color: colors.navy, fontSize: 17, fontWeight: '800', marginTop: 4 },
   activeDot: { backgroundColor: colors.success, borderRadius: 7, height: 14, width: 14 },
-  statusDetails: { flexDirection: 'row', gap: 7, marginTop: 15 },
+  statusDetails: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 15 },
   profileHero: { alignItems: 'center', marginTop: 28 },
   profileName: { color: colors.navy, fontSize: 24, fontWeight: '900', marginTop: 14 },
   profileSpecialty: { color: colors.blue, fontSize: 15, fontWeight: '700', marginTop: 4 },
@@ -821,7 +886,15 @@ const styles = StyleSheet.create({
     width: 44,
   },
   profileRowLabel: { color: colors.muted, fontSize: 11 },
-  profileRowValue: { color: colors.navy, fontSize: 14, fontWeight: '700', marginTop: 2 },
+  profileRowCopy: { flex: 1, minWidth: 0 },
+  profileRowValue: {
+    color: colors.navy,
+    flexShrink: 1,
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 20,
+    marginTop: 2,
+  },
   aboutCard: { backgroundColor: colors.white, borderRadius: 22, marginTop: 13, padding: 20 },
   aboutTitle: { color: colors.navy, fontSize: 17, fontWeight: '900' },
   aboutText: { color: colors.muted, fontSize: 14, lineHeight: 21, marginTop: 9 },
