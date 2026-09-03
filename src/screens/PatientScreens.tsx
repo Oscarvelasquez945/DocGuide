@@ -205,12 +205,6 @@ export function PatientMapScreen({
         title="Doctores cercanos"
       />
 
-      <View style={styles.searchBar}>
-        <MaterialCommunityIcons color="#7390AF" name="magnify" size={21} />
-        <Text style={styles.searchText}>Buscar por especialidad</Text>
-        <MaterialCommunityIcons color={colors.blue} name="tune-variant" size={21} />
-      </View>
-
       {permission === 'manual' && (
         <View style={styles.manualHint}>
           <MaterialCommunityIcons color={colors.blue} name="gesture-tap" size={22} />
@@ -479,17 +473,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 44,
   },
-  searchBar: {
-    alignItems: 'center',
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    flexDirection: 'row',
-    marginBottom: 13,
-    marginTop: 20,
-    minHeight: 52,
-    paddingHorizontal: 15,
-  },
-  searchText: { color: '#8192A8', flex: 1, fontSize: 14, marginLeft: 9 },
   manualHint: {
     alignItems: 'center',
     backgroundColor: '#E1ECFF',

@@ -12,7 +12,7 @@ module.exports = () => {
   return {
     name: 'DocGuide',
     slug: 'docguide',
-    version: '1.0.6',
+    version: '1.0.7',
     orientation: 'portrait',
     icon: './assets/icon.png',
     userInterfaceStyle: 'light',
@@ -22,7 +22,7 @@ module.exports = () => {
     },
     android: {
       package: 'com.docguidehn.app',
-      versionCode: 7,
+      versionCode: 8,
       adaptiveIcon: {
         backgroundColor: '#E6F4FE',
         foregroundImage: './assets/android-icon-foreground.png',
